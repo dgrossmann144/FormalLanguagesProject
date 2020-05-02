@@ -1,9 +1,11 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Grepy {
 	public static void main(String[] args) {
 		String dfaFileName = "";
 		String nfaFileName = "";
-		String regex = "";
-		String inputFileName = "";
 		
 		// Parse command line arguments based on number of arguments
 		if(args.length == 4) {
@@ -30,8 +32,8 @@ public class Grepy {
 			System.out.println("Invalid number of arguments, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
 			return;
 		}
-		regex = args[args.length - 2];
-		inputFileName = args[args.length - 1];
+		String regex = args[args.length - 2];
+		String inputFileName = args[args.length - 1];
 		
 		// Check if input file is a text file
 		if(!inputFileName.endsWith(".txt")) {
@@ -51,6 +53,19 @@ public class Grepy {
 		System.out.println("NFA File Name: " + nfaFileName);
 		System.out.println("Regex: " + regex);
 		System.out.println("Input File Name: " + inputFileName);
+		
+		String alphabet;
+		try {
+			alphabet = learnAlphabet(inputFileName);
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not find file " + inputFileName);
+			return;
+		}
+		if(alphabet.equals("")) {
+			System.out.println("Input file is empty");
+			return;
+		}
+		System.out.println(alphabet);
 	}
 	
 	// Takes in a regex string and returns true if every character in the string is in the valid character set
@@ -62,5 +77,21 @@ public class Grepy {
 			}
 		}
 		return true;
+	}
+	
+	// Takes in the name of the input file and returns a string with one of each character in the file
+	public static String learnAlphabet(String inputFileName) throws FileNotFoundException{
+		String alphabet = "";
+		Scanner scan = new Scanner(new File(inputFileName));
+		while(scan.hasNext()) {
+			String line = scan.nextLine();
+			for(int i = 0; i < line.length(); i++) {
+				if(!alphabet.contains(line.charAt(i) + "")) {
+					alphabet = alphabet + line.charAt(i);
+				}
+			}
+		}
+		scan.close();
+		return alphabet;
 	}
 }
