@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Grepy {
 	public static void main(String[] args) {
@@ -65,10 +66,11 @@ public class Grepy {
 			System.out.println("Input file is empty");
 			return;
 		}
-		System.out.println(alphabet);
+		System.out.println("Alphabet: " + alphabet);
+		createNFA(regex, alphabet);
 	}
 	
-	// Takes in a regex string and returns true if every character in the string is in the valid character set
+	// Takes in the regex string and returns true if every character in the string is in the valid character set
 	public static boolean validRegexChars(String regex) {
 		String validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()*&@";
 		for(int i = 0; i < regex.length(); i++) {
@@ -93,5 +95,19 @@ public class Grepy {
 		}
 		scan.close();
 		return alphabet;
+	}
+	
+	public static void createNFA(String regex, String alphabet) {
+		NFA nfa = new NFA(alphabet);
+		nfa.addNode(false);
+		nfa.addNode(true);
+		
+		Stack<Character> stack = new Stack<Character>();
+		for(int i = 0; i < regex.length(); i++) {
+			if(stack.peek() == '+' && alphabet.contains(regex.charAt(i) + "")) {
+				// 
+			}
+		}
+		
 	}
 }
