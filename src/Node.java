@@ -2,10 +2,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class Node {
-	private boolean accepting;
+	private int index;
 	private Hashtable<Character, ArrayList<Node>> transitions = new Hashtable<Character, ArrayList<Node>>();
-	public Node(boolean accepting) {
-		this.accepting = accepting;
+	public Node(int index) {
+		this.index = index;
 	}
 	
 	public void addTransition(char onChar, Node toNode) {
@@ -22,15 +22,19 @@ public class Node {
 		if(transitions.containsKey(onChar)) {
 			return transitions.get(onChar);
 		} else {
-			return null;
+			return new ArrayList<Node>();
 		}
 	}
 	
-	public boolean isAccepting() {
-		return this.accepting;
+	public int getIndex() {
+		return index;
 	}
 	
-	public void setAccepting(boolean accepting) {
-		this.accepting = accepting;
+	public void incrementIndex() {
+	   index++;
+	}
+	
+	public void setIndex(int index) {
+	   this.index = index;
 	}
 }
