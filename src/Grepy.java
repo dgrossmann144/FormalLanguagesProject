@@ -50,7 +50,7 @@ public class Grepy {
       // Check if the regex has valid characters
       if(!validRegexChars(regex)) {
          System.out.println(
-               "At least one of the characters in the regex is invalid, valid characters are a-z, A-Z, 0-9, (), *, &, and @");
+               "At least one of the characters in the regex is invalid, valid characters are a-z, A-Z, 0-9, (), |, *, &, and @");
          return;
       } else {
          System.out.println("regex is valid");
@@ -75,18 +75,13 @@ public class Grepy {
       alphabet += "&";
       System.out.println("Alphabet: " + alphabet);
       System.out.println();
-//      NFA nfa = new NFA(alphabet);
-//      nfa.addNode(false);
-//      nfa.addNode(false);
-//      nfa.addTransition(nfa.getNode(0), 'a', nfa.getNode(1));
-//      nfa.applyKleeneStar();
-//      NFA nfa2 = new NFA(alphabet);
-//      nfa2.addNode(false);
-//      nfa2.addNode(false);
-//      nfa2.addTransition(nfa2.getNode(0), 'b', nfa2.getNode(1));
-//      nfa.appendConcatenate(nfa2);
-      
-      System.out.println(createNFA(regex, alphabet));
+
+      NFA nfa = createNFA(regex, alphabet);
+      if(nfa != null) {
+         System.out.println(createNFA(regex, alphabet));
+      } else {
+         System.out.println("Invalid character sequence while parsing regex into NFA");
+      }
    }
 
    // Takes in the regex string and returns true if every character in the string
@@ -126,7 +121,7 @@ public class Grepy {
          if(currentChar == '(') {
             int closingParenIndex = findMatchingParen(regex, index);
             if(closingParenIndex == -1) {
-               // TODO invalid paren sequence
+               return null;
             } else {
                NFA parenNFA = createNFA(regex.substring(index + 1, closingParenIndex), alphabet);
                index = closingParenIndex;
@@ -135,11 +130,18 @@ public class Grepy {
                   index++;
                }
                nfa.appendConcatenate(parenNFA);
-               
-               
             }
          } else if(currentChar == '|') {
-
+            if(index == regex.length() - 1) {
+               return null;
+            }
+            NFA choiceNFA = createNFA(regex.substring(index + 1), alphabet);
+            if(choiceNFA != null) {
+               nfa.appendChoice(choiceNFA);
+               index = regex.length();
+            } else {
+               return null;
+            }
          } else if(validChars.contains(currentChar + "")) {
             NFA basicNFA = createBasicNFA(currentChar, alphabet);
             if(index + 1 < regex.length() && regex.charAt(index + 1) == '*') {
@@ -148,7 +150,7 @@ public class Grepy {
             }
             nfa.appendConcatenate(basicNFA);
          } else {
-            // TODO invalid char or sequence, error
+            return null;
          }
          index++;
       }
