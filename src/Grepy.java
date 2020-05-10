@@ -82,6 +82,8 @@ public class Grepy {
       } else {
          System.out.println("Invalid character sequence while parsing regex into NFA");
       }
+      
+      DFA dfa = createDFA(nfa);
    }
 
    // Takes in the regex string and returns true if every character in the string
@@ -175,6 +177,12 @@ public class Grepy {
          }
       }
       return nfa;
+   }
+   
+   public static DFA createDFA(NFA nfa) {
+      DFA dfa = new DFA(nfa.getAlphabet());
+      
+      return dfa;
    }
 
    public static int findMatchingParen(String regex, int startingParen) {
