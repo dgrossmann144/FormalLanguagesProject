@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -42,6 +45,45 @@ public class DFA {
       }
       
       return nodes.get(currentState).isAccepting();
+   }
+   
+   public void generateDotFile(String dfaFileName) {
+      String result = "digraph {\n";
+      Object[] keys = nodes.keySet().toArray();
+      
+      result += "\t\"\" [shape=none];\n";
+      for(int i = 0; i < nodes.size(); i++) {
+         DFANode node = nodes.get(keys[i]);
+         if(node.isAccepting()) {
+            result += "\t\"" + node.getStringName() + "\" [shape=doublecircle];\n";
+         } else {
+            result += "\t\"" + node.getStringName() + "\" [shape=circle];\n";
+         }
+      }
+      
+      result += "\t\"\" -> \"" + nodes.get(startState).getStringName() + "\";\n";
+      
+      for(int i = 0; i < nodes.size(); i++) {
+         DFANode node = nodes.get(keys[i]);
+         for(int j = 0; j < alphabet.length(); j++) {
+            result += "\t\"" + node.getStringName() + "\" -> \"" + node.getTransition(alphabet.charAt(j)).getStringName() + "\" [label=" + alphabet.charAt(j) + "];\n";
+         }
+      }
+      result += "}";
+      
+      try {
+         File dfaFile = new File(dfaFileName + ".gv");
+         if(dfaFile.createNewFile()) {
+            FileWriter dfaFileWriter = new FileWriter(dfaFileName + ".gv");
+            dfaFileWriter.write(result);
+            dfaFileWriter.close();
+         } else {
+            System.out.println("Could not create dfa file " + dfaFileName + " because that file already exists");
+            return;
+         }
+      } catch(IOException error) {
+         System.out.println("An error occurred while creatign dfa file");
+      }
    }
 
    public String toString() {

@@ -102,6 +102,14 @@ public class Grepy {
          System.out.println("Could not find file " + inputFileName);
          return;
       }
+      
+      if(!dfaFileName.equals("")) {
+         dfa.generateDotFile(dfaFileName);
+      }
+      
+//      if(!nfaFileName.equals("")) {
+//         nfa.generateDotFile(nfaFileName);
+//      }
    }
 
    // Takes in the regex string and returns true if every character in the string

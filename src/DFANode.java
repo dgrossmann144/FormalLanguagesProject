@@ -29,4 +29,16 @@ public class DFANode {
    public ArrayList<Integer> getName() {
       return name;
    }
+   
+   public String getStringName() {
+      String result = "";
+      for(int i = 0; i < name.size(); i++) {
+         if(i == name.size() - 1) {
+            result += name.get(i);
+         } else {
+            result += name.get(i) + ", ";
+         }
+      }
+      return result;
+   }
 }
