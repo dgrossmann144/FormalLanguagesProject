@@ -79,9 +79,11 @@ public class Grepy {
 
       NFA nfa = createNFA(regex, alphabet);
       if(nfa != null) {
+         System.out.println("nfa");
          System.out.println(nfa);
       } else {
          System.out.println("Invalid character sequence while parsing regex into NFA");
+         return;
       }
 
       ArrayList<Integer> startingNodes = new ArrayList<Integer>();
@@ -92,6 +94,14 @@ public class Grepy {
       System.out.println();
       System.out.println("dfa");
       System.out.println(dfa);
+      
+      System.out.println();
+      try {
+         computeStrings(dfa, inputFileName);
+      } catch(FileNotFoundException e) {
+         System.out.println("Could not find file " + inputFileName);
+         return;
+      }
    }
 
    // Takes in the regex string and returns true if every character in the string
@@ -120,6 +130,17 @@ public class Grepy {
       }
       scan.close();
       return alphabet;
+   }
+   
+   public static void computeStrings(DFA dfa, String inputFileName) throws FileNotFoundException {
+      Scanner scan = new Scanner(new File(inputFileName));
+      while(scan.hasNext()) {
+         String line = scan.nextLine();
+         if(dfa.computeString(line)) {
+            System.out.println(line);
+         }
+      }
+      scan.close();
    }
 
    public static NFA createNFA(String regex, String alphabet) {
