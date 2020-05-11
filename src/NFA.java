@@ -76,6 +76,57 @@ public class NFA {
       }
    }
 
+   public ArrayList<Integer> getTransitions(ArrayList<Integer> nodesList, char onChar) {
+      ArrayList<Integer> result = new ArrayList<Integer>();
+      
+      for(int i = 0; i < nodesList.size(); i++) {
+         ArrayList<NFANode> transitions = nodes.get(nodesList.get(i)).getTransitions(onChar);
+         for(int j = 0; j < transitions.size(); j++) {
+            result.add(transitions.get(j).getIndex());
+         }
+      }
+
+      ArrayList<Integer> epsilonTransitions = getEpsilonTransitions(result);
+      for(int i = 0; i < epsilonTransitions.size(); i++) {
+         result.add(epsilonTransitions.get(i));
+      }
+      
+      return Utils.sort(Utils.removeDuplicates(result));
+   }
+
+   public ArrayList<Integer> getEpsilonTransitions(ArrayList<Integer> nodesList) {
+      ArrayList<Integer> result = new ArrayList<Integer>();
+
+      for(int i = 0; i < nodesList.size(); i++) {
+         result.add(nodes.get(nodesList.get(i)).getIndex());
+         NFANode node = nodes.get(nodesList.get(i));
+         for(int j = 0; j < node.getTransitions('&').size(); j++) {
+            result.add(node.getTransitions('&').get(j).getIndex());
+         }
+      }
+      result = Utils.sort(Utils.removeDuplicates(result));
+      
+      int startingSize;
+      do {
+         ArrayList<Integer> newElements = new ArrayList<Integer>();
+         startingSize = result.size();
+         for(int i = 0; i < result.size(); i++) {
+            NFANode node = nodes.get(result.get(i));
+            for(int j = 0; j < node.getTransitions('&').size(); j++) {
+               newElements.add(node.getTransitions('&').get(j).getIndex());
+            }
+         }
+         result.addAll(newElements);
+         result = Utils.sort(Utils.removeDuplicates(result));
+      } while(result.size() != startingSize);
+
+      return result;
+   }
+   
+   public boolean doesStatesListAccept(ArrayList<Integer> states) {
+      return states.contains(nodes.size() - 1);
+   }
+
    public String toString() {
       String result = "";
       result += "Alphabet: " + alphabet + "\n";
