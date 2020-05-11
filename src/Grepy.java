@@ -96,10 +96,12 @@ public class Grepy {
       System.out.println(dfa);
       
       System.out.println();
-      System.out.println(dfa.computeString("a"));
-      System.out.println(dfa.computeString("aaaab"));
-      System.out.println(dfa.computeString("aaaaabbbba"));
-      System.out.println(dfa.computeString("aaaaabbbbaaaa"));
+      try {
+         computeStrings(dfa, inputFileName);
+      } catch(FileNotFoundException e) {
+         System.out.println("Could not find file " + inputFileName);
+         return;
+      }
    }
 
    // Takes in the regex string and returns true if every character in the string
@@ -128,6 +130,17 @@ public class Grepy {
       }
       scan.close();
       return alphabet;
+   }
+   
+   public static void computeStrings(DFA dfa, String inputFileName) throws FileNotFoundException {
+      Scanner scan = new Scanner(new File(inputFileName));
+      while(scan.hasNext()) {
+         String line = scan.nextLine();
+         if(dfa.computeString(line)) {
+            System.out.println(line);
+         }
+      }
+      scan.close();
    }
 
    public static NFA createNFA(String regex, String alphabet) {
