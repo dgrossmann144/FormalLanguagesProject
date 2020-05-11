@@ -1,29 +1,29 @@
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class Node {
+public class NFANode {
    private int index;
-   private Hashtable<Character, ArrayList<Node>> transitions = new Hashtable<Character, ArrayList<Node>>();
+   private Hashtable<Character, ArrayList<NFANode>> transitions = new Hashtable<Character, ArrayList<NFANode>>();
 
-   public Node(int index) {
+   public NFANode(int index) {
       this.index = index;
    }
 
-   public void addTransition(char onChar, Node toNode) {
+   public void addTransition(char onChar, NFANode toNode) {
       if(transitions.containsKey(onChar)) {
          transitions.get(onChar).add(toNode);
       } else {
-         ArrayList<Node> nodes = new ArrayList<Node>();
+         ArrayList<NFANode> nodes = new ArrayList<NFANode>();
          nodes.add(toNode);
          transitions.put(onChar, nodes);
       }
    }
 
-   public ArrayList<Node> getTransitions(char onChar) {
+   public ArrayList<NFANode> getTransitions(char onChar) {
       if(transitions.containsKey(onChar)) {
          return transitions.get(onChar);
       } else {
-         return new ArrayList<Node>();
+         return new ArrayList<NFANode>();
       }
    }
 

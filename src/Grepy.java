@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -78,10 +79,19 @@ public class Grepy {
 
       NFA nfa = createNFA(regex, alphabet);
       if(nfa != null) {
-         System.out.println(createNFA(regex, alphabet));
+         System.out.println(nfa);
       } else {
          System.out.println("Invalid character sequence while parsing regex into NFA");
       }
+
+      ArrayList<Integer> startingNodes = new ArrayList<Integer>();
+      startingNodes.add(0);
+      nfa.getEpsilonTransitions(startingNodes);
+
+      DFA dfa = createDFA(nfa);
+      System.out.println();
+      System.out.println("dfa");
+      System.out.println(dfa);
    }
 
    // Takes in the regex string and returns true if every character in the string
@@ -119,7 +129,7 @@ public class Grepy {
       while(index < regex.length()) {
          char currentChar = regex.charAt(index);
          if(currentChar == '(') {
-            int closingParenIndex = findMatchingParen(regex, index);
+            int closingParenIndex = Utils.findMatchingParen(regex, index);
             if(closingParenIndex == -1) {
                return null;
             } else {
@@ -177,18 +187,28 @@ public class Grepy {
       return nfa;
    }
 
-   public static int findMatchingParen(String regex, int startingParen) {
-      int parenCount = 1;
-      for(int i = startingParen + 1; i < regex.length(); i++) {
-         if(regex.charAt(i) == '(') {
-            parenCount++;
-         } else if(regex.charAt(i) == ')') {
-            parenCount--;
-            if(parenCount == 0) {
-               return i;
+   public static DFA createDFA(NFA nfa) {
+      DFA dfa = new DFA(nfa.getAlphabet().replaceAll("&", ""));
+      Stack<ArrayList<Integer>> statesStack = new Stack<ArrayList<Integer>>();
+
+      ArrayList<Integer> startList = new ArrayList<Integer>();
+      startList.add(0);
+      startList = nfa.getEpsilonTransitions(startList);
+      statesStack.push(startList);
+      dfa.addNode(startList, nfa.doesStatesListAccept(startList), true);
+
+      while(!statesStack.empty()) {
+         ArrayList<Integer> nfaStates = statesStack.pop();
+         for(int j = 0; j < dfa.getAlphabet().length(); j++) {
+            ArrayList<Integer> newStates = nfa.getTransitions(nfaStates, dfa.getAlphabet().charAt(j));
+            if(!dfa.isNameInNodes(newStates)) {
+               dfa.addNode(newStates, nfa.doesStatesListAccept(newStates), false);
+               statesStack.push(newStates);
             }
+            dfa.getNode(nfaStates).setTransition(dfa.getAlphabet().charAt(j), dfa.getNode(newStates));
          }
       }
-      return -1;
+
+      return dfa;
    }
 }

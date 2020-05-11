@@ -2,27 +2,27 @@ import java.util.ArrayList;
 
 public class NFA {
    private String alphabet;
-   private ArrayList<Node> nodes = new ArrayList<Node>();
+   private ArrayList<NFANode> nodes = new ArrayList<NFANode>();
 
    public NFA(String alphabet) {
       this.alphabet = alphabet;
    }
 
    public int addNode() {
-      Node newNode = new Node(nodes.size());
+      NFANode newNode = new NFANode(nodes.size());
       nodes.add(newNode);
       return newNode.getIndex();
    }
 
    public void insertNode(int index) {
-      Node newNode = new Node(index);
+      NFANode newNode = new NFANode(index);
       nodes.add(index, newNode);
       for(int i = index + 1; i < nodes.size(); i++) {
          nodes.get(i).incrementIndex();
       }
    }
 
-   public void addTransition(Node fromNode, char onChar, Node toNode) {
+   public void addTransition(NFANode fromNode, char onChar, NFANode toNode) {
       fromNode.addTransition(onChar, toNode);
    }
 
@@ -30,11 +30,11 @@ public class NFA {
       return alphabet;
    }
 
-   public ArrayList<Node> getNodesList() {
+   public ArrayList<NFANode> getNodesList() {
       return nodes;
    }
 
-   public Node getNode(int index) {
+   public NFANode getNode(int index) {
       return nodes.get(index);
    }
 
@@ -49,7 +49,7 @@ public class NFA {
 
    public void appendConcatenate(NFA appending) {
       int endingNode = nodes.size() - 1;
-      ArrayList<Node> appendingNodes = appending.getNodesList();
+      ArrayList<NFANode> appendingNodes = appending.getNodesList();
       for(int i = 0; i < appendingNodes.size(); i++) {
          appendingNodes.get(i).setIndex(i + endingNode + 1);
          nodes.add(appendingNodes.get(i));
@@ -61,7 +61,7 @@ public class NFA {
 
    public void appendChoice(NFA appending) {
       int endingNode = nodes.size() - 1;
-      ArrayList<Node> appendingNodes = appending.getNodesList();
+      ArrayList<NFANode> appendingNodes = appending.getNodesList();
       for(int i = 0; i < appendingNodes.size(); i++) {
          appendingNodes.get(i).setIndex(i + endingNode + 1);
          nodes.add(appendingNodes.get(i));
@@ -76,6 +76,57 @@ public class NFA {
       }
    }
 
+   public ArrayList<Integer> getTransitions(ArrayList<Integer> nodesList, char onChar) {
+      ArrayList<Integer> result = new ArrayList<Integer>();
+      
+      for(int i = 0; i < nodesList.size(); i++) {
+         ArrayList<NFANode> transitions = nodes.get(nodesList.get(i)).getTransitions(onChar);
+         for(int j = 0; j < transitions.size(); j++) {
+            result.add(transitions.get(j).getIndex());
+         }
+      }
+
+      ArrayList<Integer> epsilonTransitions = getEpsilonTransitions(result);
+      for(int i = 0; i < epsilonTransitions.size(); i++) {
+         result.add(epsilonTransitions.get(i));
+      }
+      
+      return Utils.sort(Utils.removeDuplicates(result));
+   }
+
+   public ArrayList<Integer> getEpsilonTransitions(ArrayList<Integer> nodesList) {
+      ArrayList<Integer> result = new ArrayList<Integer>();
+
+      for(int i = 0; i < nodesList.size(); i++) {
+         result.add(nodes.get(nodesList.get(i)).getIndex());
+         NFANode node = nodes.get(nodesList.get(i));
+         for(int j = 0; j < node.getTransitions('&').size(); j++) {
+            result.add(node.getTransitions('&').get(j).getIndex());
+         }
+      }
+      result = Utils.sort(Utils.removeDuplicates(result));
+      
+      int startingSize;
+      do {
+         ArrayList<Integer> newElements = new ArrayList<Integer>();
+         startingSize = result.size();
+         for(int i = 0; i < result.size(); i++) {
+            NFANode node = nodes.get(result.get(i));
+            for(int j = 0; j < node.getTransitions('&').size(); j++) {
+               newElements.add(node.getTransitions('&').get(j).getIndex());
+            }
+         }
+         result.addAll(newElements);
+         result = Utils.sort(Utils.removeDuplicates(result));
+      } while(result.size() != startingSize);
+
+      return result;
+   }
+   
+   public boolean doesStatesListAccept(ArrayList<Integer> states) {
+      return states.contains(nodes.size() - 1);
+   }
+
    public String toString() {
       String result = "";
       result += "Alphabet: " + alphabet + "\n";
@@ -83,7 +134,7 @@ public class NFA {
          result += "Node " + i + "\n";
          for(int j = 0; j < alphabet.length(); j++) {
             result += "\t" + alphabet.charAt(j) + ": ";
-            ArrayList<Node> transitions = nodes.get(i).getTransitions(alphabet.charAt(j));
+            ArrayList<NFANode> transitions = nodes.get(i).getTransitions(alphabet.charAt(j));
             for(int k = 0; k < transitions.size(); k++) {
                if(k == transitions.size() - 1) {
                   result += transitions.get(k).getIndex();
