@@ -79,9 +79,11 @@ public class Grepy {
 
       NFA nfa = createNFA(regex, alphabet);
       if(nfa != null) {
+         System.out.println("nfa");
          System.out.println(nfa);
       } else {
          System.out.println("Invalid character sequence while parsing regex into NFA");
+         return;
       }
 
       ArrayList<Integer> startingNodes = new ArrayList<Integer>();
@@ -92,6 +94,12 @@ public class Grepy {
       System.out.println();
       System.out.println("dfa");
       System.out.println(dfa);
+      
+      System.out.println();
+      System.out.println(dfa.computeString("a"));
+      System.out.println(dfa.computeString("aaaab"));
+      System.out.println(dfa.computeString("aaaaabbbba"));
+      System.out.println(dfa.computeString("aaaaabbbbaaaa"));
    }
 
    // Takes in the regex string and returns true if every character in the string

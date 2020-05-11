@@ -5,15 +5,13 @@ public class DFANode {
    private Hashtable<Character, DFANode> transitions = new Hashtable<Character, DFANode>();
    private boolean accepting;
    private ArrayList<Integer> name;
-   private boolean startState;
 
-   public DFANode(String alphabet, boolean accepting, ArrayList<Integer> name, boolean startState) {
+   public DFANode(String alphabet, boolean accepting, ArrayList<Integer> name) {
       this.accepting = accepting;
       for(int i = 0; i < alphabet.length(); i++) {
          transitions.put(alphabet.charAt(i), this);
       }
       this.name = name;
-      this.startState = startState;
    }
 
    public DFANode getTransition(char onChar) {
@@ -26,10 +24,6 @@ public class DFANode {
 
    public boolean isAccepting() {
       return accepting;
-   }
-   
-   public boolean isStart() {
-      return startState;
    }
    
    public ArrayList<Integer> getName() {
