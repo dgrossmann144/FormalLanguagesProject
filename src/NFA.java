@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class NFA {
@@ -125,6 +128,49 @@ public class NFA {
    
    public boolean doesStatesListAccept(ArrayList<Integer> states) {
       return states.contains(nodes.size() - 1);
+   }
+   
+   public void generateDotFile(String nfaFileName) {
+      String result = "digraph {\n";
+      
+      result += "\t\"\" [shape=none];\n";
+      for(int i = 0; i < nodes.size(); i++) {
+         if(i == nodes.size() - 1) {
+            result += "\t\"" + i + "\" [shape=doublecircle];\n";
+         } else {
+            result += "\t\"" + i + "\" [shape=circle];\n";
+         }
+      }
+      
+      result += "\t\"\" -> \"0\";\n";
+      
+      for(int i = 0; i < nodes.size(); i++) {
+         NFANode node = nodes.get(i);
+         for(int j = 0; j < alphabet.length(); j++) {
+            if(node.getTransitions(alphabet.charAt(j)).size() > 0) {
+               for(int k = 0; k < node.getTransitions(alphabet.charAt(j)).size(); k++) {
+                  result += "\t\"" + node.getIndex() + "\" -> \"" + node.getTransitions(alphabet.charAt(j)).get(k).getIndex() + "\" [label=\"" + alphabet.charAt(j) + "\"];\n";
+               }
+            }
+         }
+      }
+      result += "}";
+      
+      
+      try {
+          File nfaFile = new File(nfaFileName + ".gv");
+          if(nfaFile.createNewFile()) {
+             FileWriter nfaFileWriter = new FileWriter(nfaFileName + ".gv");
+             nfaFileWriter.write(result);
+             nfaFileWriter.close();
+             System.out.println("Successfully created DOT format file for nfa");
+          } else {
+             System.out.println("Could not create nfa file " + nfaFileName + " because that file already exists");
+             return;
+          }
+       } catch(IOException error) {
+          System.out.println("An error occurred while creating nfa file");
+       }
    }
 
    public String toString() {
