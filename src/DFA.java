@@ -66,7 +66,7 @@ public class DFA {
       for(int i = 0; i < nodes.size(); i++) {
          DFANode node = nodes.get(keys[i]);
          for(int j = 0; j < alphabet.length(); j++) {
-            result += "\t\"" + node.getStringName() + "\" -> \"" + node.getTransition(alphabet.charAt(j)).getStringName() + "\" [label=" + alphabet.charAt(j) + "];\n";
+            result += "\t\"" + node.getStringName() + "\" -> \"" + node.getTransition(alphabet.charAt(j)).getStringName() + "\" [label=\"" + alphabet.charAt(j) + "\"];\n";
          }
       }
       result += "}";
@@ -77,12 +77,13 @@ public class DFA {
             FileWriter dfaFileWriter = new FileWriter(dfaFileName + ".gv");
             dfaFileWriter.write(result);
             dfaFileWriter.close();
+            System.out.println("Successfully created DOT format file for dfa");
          } else {
             System.out.println("Could not create dfa file " + dfaFileName + " because that file already exists");
             return;
          }
       } catch(IOException error) {
-         System.out.println("An error occurred while creatign dfa file");
+         System.out.println("An error occurred while creating dfa file");
       }
    }
 
