@@ -1,7 +1,5 @@
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Stack;
 
 public class Grepy {
@@ -18,7 +16,7 @@ public class Grepy {
          } else if(args[0].equals("-n")) {
             nfaFileName = args[1];
          } else {
-            System.out.println("Invalid argument, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
+            System.out.println("Invalid argument, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
             return;
          }
       } else if(args.length == 6) {
@@ -29,11 +27,11 @@ public class Grepy {
             dfaFileName = args[3];
             nfaFileName = args[1];
          } else {
-            System.out.println("Invalid argument, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
+            System.out.println("Invalid argument, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
             return;
          }
       } else if(args.length != 2) {
-         System.out.println("Invalid number of arguments, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
+         System.out.println("Invalid number of arguments, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
          return;
       }
       String regex = args[args.length - 2];
@@ -46,130 +44,90 @@ public class Grepy {
       }
 
       // Check if the regex has valid characters
-      if(!validRegexChars(regex)) {
+      if(!Utils.validRegexChars(regex)) {
          System.out.println("At least one of the characters in the regex is invalid, valid characters are a-z, A-Z, 0-9, (), |, *, &, and @");
          return;
-      } else {
-//         System.out.println("regex is valid");
       }
 
-//      System.out.println("DFA File Name: " + dfaFileName);
-//      System.out.println("NFA File Name: " + nfaFileName);
-//      System.out.println("Regex: " + regex);
-//      System.out.println("Input File Name: " + inputFileName);
-
+      // Learn the alphabet from the input file
       String alphabet;
       try {
-         alphabet = learnAlphabet(inputFileName);
+         alphabet = Utils.learnAlphabet(inputFileName);
+         if(alphabet.equals("")) {
+            System.out.println("Input file is empty");
+            return;
+         }
+         // Empty string is always included in an NFA alphabet
+         alphabet += "&";
       } catch(FileNotFoundException e) {
          System.out.println("Could not find file " + inputFileName);
          return;
       }
-      if(alphabet.equals("")) {
-         System.out.println("Input file is empty");
-         return;
-      }
-      alphabet += "&";
-//      System.out.println("Alphabet: " + alphabet);
-//      System.out.println();
 
+      // Create the NFA
       NFA nfa = createNFA(regex, alphabet);
-      if(nfa != null) {
-//         System.out.println("nfa");
-//         System.out.println(nfa);
-      } else {
+      if(nfa == null) {
          System.out.println("Invalid character sequence while parsing regex into NFA");
          return;
       }
 
-      ArrayList<Integer> startingNodes = new ArrayList<Integer>();
-      startingNodes.add(0);
-      nfa.getEpsilonTransitions(startingNodes);
-
+      // Create the DFA
       DFA dfa = createDFA(nfa);
-//      System.out.println();
-//      System.out.println("dfa");
-//      System.out.println(dfa);
-//      System.out.println();
 
+      // Output the strings from the input file if they accept on the DFA
       try {
-         computeStrings(dfa, inputFileName);
+         Utils.computeStrings(dfa, inputFileName);
       } catch(FileNotFoundException e) {
          System.out.println("Could not find file " + inputFileName);
          return;
       }
 
-      if(!dfaFileName.equals("")) {
-         dfa.generateDotFile(dfaFileName);
-      }
-
+      // If the NFA file name exists create the dot file for it
       if(!nfaFileName.equals("")) {
          nfa.generateDotFile(nfaFileName);
       }
-   }
 
-   // Takes in the regex string and returns true if every character in the string
-   // is in the valid character set
-   public static boolean validRegexChars(String regex) {
-      for(int i = 0; i < regex.length(); i++) {
-         if(!(validChars + "()|*").contains(regex.charAt(i) + "")) {
-            return false;
-         }
+      // If the DFA file name exists create the dot file for it
+      if(!dfaFileName.equals("")) {
+         dfa.generateDotFile(dfaFileName);
       }
-      return true;
    }
 
-   // Takes in the name of the input file and returns a string with one of each
-   // character in the file
-   public static String learnAlphabet(String inputFileName) throws FileNotFoundException {
-      String alphabet = "";
-      Scanner scan = new Scanner(new File(inputFileName));
-      while(scan.hasNext()) {
-         String line = scan.nextLine();
-         for(int i = 0; i < line.length(); i++) {
-            if(!alphabet.contains(line.charAt(i) + "")) {
-               alphabet = alphabet + line.charAt(i);
-            }
-         }
-      }
-      scan.close();
-      return alphabet;
-   }
-
-   public static void computeStrings(DFA dfa, String inputFileName) throws FileNotFoundException {
-      Scanner scan = new Scanner(new File(inputFileName));
-      while(scan.hasNext()) {
-         String line = scan.nextLine();
-         if(dfa.computeString(line)) {
-            System.out.println(line);
-         }
-      }
-      scan.close();
-   }
-
+   // Creates NFA based on the given regex and alphabet
    public static NFA createNFA(String regex, String alphabet) {
       NFA nfa = new NFA(alphabet);
 
+      // Tracks the current character in the regex that is being processed
       int index = 0;
+
       while(index < regex.length()) {
+         // Get the current character and based on what it is add different things to the
+         // NFA
          char currentChar = regex.charAt(index);
          if(currentChar == '(') {
             int closingParenIndex = Utils.findMatchingParen(regex, index);
             if(closingParenIndex == -1) {
                return null;
             } else {
+               // Recursively call createNFA on the part of the regex in parenthesis
                NFA parenNFA = createNFA(regex.substring(index + 1, closingParenIndex), alphabet);
+               // Move the index to the closing parenthesis
                index = closingParenIndex;
+               // Check to see if a star follows the parenthesis
                if(index + 1 < regex.length() && regex.charAt(index + 1) == '*') {
                   parenNFA.applyKleeneStar();
                   index++;
                }
+               // Append the part of the regex in parenthesis to the end of the existing NFA
                nfa.appendConcatenate(parenNFA);
             }
          } else if(currentChar == '|') {
+            // If | is the last character the regex is invalid
             if(index == regex.length() - 1) {
                return null;
             }
+            // Recursively call createNFA on the right half of the choice symbol and then
+            // append it to the existing NFA
             NFA choiceNFA = createNFA(regex.substring(index + 1), alphabet);
             if(choiceNFA != null) {
                nfa.appendChoice(choiceNFA);
@@ -178,25 +136,32 @@ public class Grepy {
                return null;
             }
          } else if(validChars.contains(currentChar + "")) {
+            // If the character is a part of the alphabet create a simple NFA for it
             NFA basicNFA = createBasicNFA(currentChar, alphabet);
+            // Check if it is followed by a star,
             if(index + 1 < regex.length() && regex.charAt(index + 1) == '*') {
                basicNFA.applyKleeneStar();
                index++;
             }
+            // Append the basic NFA to the end of the existing NFA
             nfa.appendConcatenate(basicNFA);
          } else {
+            // Character is invalid
             return null;
          }
+         // Move to the next character
          index++;
       }
 
       return nfa;
    }
 
+   // Creates a simple NFA with one transition
    public static NFA createBasicNFA(char character, String alphabet) {
       NFA nfa = new NFA(alphabet);
       int startIndex = nfa.addNode();
       int endIndex = nfa.addNode();
+
       switch(character) {
          case '&': {
             nfa.addTransition(nfa.getNode(startIndex), '&', nfa.getNode(endIndex));
@@ -212,24 +177,35 @@ public class Grepy {
       return nfa;
    }
 
+   // Creates a DFA from the given NFA
    public static DFA createDFA(NFA nfa) {
+      // DFA alphabet does not include empty string
       DFA dfa = new DFA(nfa.getAlphabet().replaceAll("&", ""));
+      // Stack keeps track of the sets of states that still need to be processed
       Stack<ArrayList<Integer>> statesStack = new Stack<ArrayList<Integer>>();
 
+      // Add the first state to the stack
       ArrayList<Integer> startList = new ArrayList<Integer>();
       startList.add(0);
+      // Includes any epsilon transitions from the starting node
       startList = nfa.getEpsilonTransitions(startList);
       statesStack.push(startList);
       dfa.addNode(startList, nfa.doesStatesListAccept(startList), true);
 
+      // Continue while there are more sets of states that need to be processed
       while(!statesStack.empty()) {
          ArrayList<Integer> nfaStates = statesStack.pop();
+         // For each character in the DFAs alphabet
          for(int j = 0; j < dfa.getAlphabet().length(); j++) {
+            // Get the
             ArrayList<Integer> newStates = nfa.getTransitions(nfaStates, dfa.getAlphabet().charAt(j));
-            if(!dfa.isNameInNodes(newStates)) {
+            // If the set of states is already in the DFA then it doesn't need to be added
+            // again
+            if(!dfa.isLabelInNodes(newStates)) {
                dfa.addNode(newStates, nfa.doesStatesListAccept(newStates), false);
                statesStack.push(newStates);
             }
+            // Add a transition from the current state to the new state
             dfa.getNode(nfaStates).setTransition(dfa.getAlphabet().charAt(j), dfa.getNode(newStates));
          }
       }
