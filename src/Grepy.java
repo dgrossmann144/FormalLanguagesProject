@@ -16,7 +16,7 @@ public class Grepy {
          } else if(args[0].equals("-n")) {
             nfaFileName = args[1];
          } else {
-            System.out.println("Invalid argument, correct usage is: java Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
+            System.out.println("Invalid argument, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
             return;
          }
       } else if(args.length == 6) {
@@ -27,11 +27,11 @@ public class Grepy {
             dfaFileName = args[3];
             nfaFileName = args[1];
          } else {
-            System.out.println("Invalid argument, correct usage is: java Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
+            System.out.println("Invalid argument, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
             return;
          }
       } else if(args.length != 2) {
-         System.out.println("Invalid number of arguments, correct usage is: java Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
+         System.out.println("Invalid number of arguments, correct usage is: Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
          return;
       }
       String regex = args[args.length - 2];
