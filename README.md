@@ -20,7 +20,7 @@ CMPT 440 Formal Languages and Computability Project
 6. Input file must be a .txt file
 
 ## Examples
-1. `java -cp ./bin Grepy "(a|b)*a" "exampleInputFiles/example1.txt` outputs: aaaabbbba, aaaabbbabababa, a, abba, ba
-2. `java -cp ./bin Grepy "@" "exampleInputFiles/example2.txt` outputs: 
-3. `java -cp ./bin Grepy "(0|1)(10)*0(0|1)" "exampleInputFiles/example3.txt` outputs: 1101001, 000, 001, 101
-4. `java -cp ./bin Grepy "(k|b|&)(ing)*" "exampleInputFiles/example4.txt` outputs: king, bing, ing, kinging, binging, inginging
+1. `java -cp ./bin Grepy "(a|b)*a" "exampleInputFiles/example1.txt"` outputs: aaaabbbba, aaaabbbabababa, a, abba, ba
+2. `java -cp ./bin Grepy "@" "exampleInputFiles/example2.txt"` outputs: 
+3. `java -cp ./bin Grepy "(0|1)(10)*0(0|1)" "exampleInputFiles/example3.txt"` outputs: 1101001, 000, 001, 101
+4. `java -cp ./bin Grepy "(k|b|&)(ing)*" "exampleInputFiles/example4.txt"` outputs: king, bing, ing, kinging, binging, inginging
