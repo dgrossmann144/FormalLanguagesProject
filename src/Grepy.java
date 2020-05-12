@@ -1,7 +1,5 @@
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.Stack;
 
 public class Grepy {
@@ -29,11 +27,11 @@ public class Grepy {
             dfaFileName = args[3];
             nfaFileName = args[1];
          } else {
-            System.out.println("Invalid argument, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
+            System.out.println("Invalid argument, correct usage is: java Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
             return;
          }
       } else if(args.length != 2) {
-         System.out.println("Invalid number of arguments, correct usage is: java Grepy [-d DFA-FILE] [-n NFA-FILE] \"REGEX\" FILE");
+         System.out.println("Invalid number of arguments, correct usage is: java Grepy [-d \"DFA-FILE\"] [-n \"NFA-FILE\"] \"REGEX\" \"FILE\"");
          return;
       }
       String regex = args[args.length - 2];
